@@ -1,113 +1,85 @@
+import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Route, Routes, useNavigate, useParams } from 'react-router-dom'
-import React from 'react'
+import { applyMiddleware, combineReducers, legacy_createStore as createStore } from 'redux'
+import thunk, { ThunkAction, ThunkDispatch } from 'redux-thunk'
+import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
-type UserType = {
-    id: number
-    name: string
-    avatar: string
-    age: number
-    address: string
+// Reducer
+const initState = {
+    work: 0,
+    donate: 0,
+    balance: 0,
+}
+type InitStateType = typeof initState
+
+const appReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
+    switch (action.type) {
+        case 'CHANGE_VALUE':
+            debugger
+            return {
+                ...state,
+                ...action.payload,
+            }
+        default:
+            return state
+    }
 }
 
-const users: UserType[] = [
-    {
-        id: 1,
-        name: 'my Name',
-        age: 32,
-        avatar: '—ฅ/ᐠ.̫ .ᐟ\\ฅ—',
-        address: 'my Address'
-    },
-    {
-        id: 2,
-        name: 'John',
-        age: 22,
-        avatar: ':)',
-        address: 'California'
-    },
-    {
-        id: 3,
-        name: 'Mike',
-        age: 18,
-        avatar: '^._.^',
-        address: 'New York'
-    },
-    {
-        id: 4,
-        name: 'Emma',
-        age: 38,
-        avatar: '/ᐠ-ꞈ-ᐟ\\',
-        address: 'Washington'
-    },
-]
+// Store
+const rootReducer = combineReducers({app: appReducer})
 
-const StartPage = () => {
-    const navigate = useNavigate()
-    const friends = users.filter(u => u.id !== 1)
+const store = createStore(rootReducer, applyMiddleware(thunk))
+type RootState = ReturnType<typeof store.getState>
+type AppDispatch = ThunkDispatch<RootState, unknown, ActionsType>
+type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, ActionsType>
+const useAppDispatch = () => useDispatch<AppDispatch>()
+const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
 
-    const mappedFriends = friends.map((f, i) => {
-        const go = () => {
-            navigate('/friend/' + f.id)
-        }
+const changeValue = (payload: any) => ({type: 'CHANGE_VALUE', payload} as const)
+type ActionsType = ReturnType<typeof changeValue>
 
-        return (
-            <div key={i} onClick={go} style={{paddingLeft: 24, color: 'blue', cursor: 'pointer'}}>
-                {f.name}, {f.age}
-            </div>
-        )
-    })
+// Components
+export const Income = () => {
+    const work = useAppSelector(state => state.app.work)
+    const donate = useAppSelector(state => state.app.donate)
+    const balance = useAppSelector(state => state.app.balance)
 
-    return (
-        <div>
-            <h2>My profile</h2>
-            <Profile userId={1}/>
-            <hr/>
-            <h2>Friends</h2>
-            {mappedFriends}
-        </div>
-    )
-}
-const Profile: React.FC<{ userId?: number }> = ({userId}) => {
-    const {id} = useParams<{ id: string }>()
-    const user = users.find(u => u.id === +(id || userId || 0))
+    const dispatch = useAppDispatch()
 
     return (
         <div>
             <div>
-                <b>avatar</b> {user?.avatar}
+                work: <input value={work}
+                             type={'number'}
+                             onChange={e => dispatch(changeValue({work: +e.target.value}))}/>
             </div>
             <div>
-                <div><b>name</b>: {user?.name}</div>
-                <div><b>age</b>: {user?.age}</div>
-                <div><b>address</b>: {user?.address}</div>
+                donate: <input value={donate}
+                               type={'number'}
+                               onChange={e => dispatch(changeValue({donate: +e.target.value}))}/>
             </div>
-        </div>
-    )
-}
 
-export const Friends = () => {
-    return (
-        <Routes>
-            <Route path={'/'} element={<StartPage/>}/>
-            <Route path={'friend'} element={<Profile/>}/>
-            <Route path={'*'} element={<div>❌404 Page Not Found❌</div>}/>
-        </Routes>
+            <div>balance: {balance}</div>
+            <button
+                onClick={() => {
+                    dispatch(changeValue({balance: work + donate}))
+                }}
+            >
+                calculate balance
+            </button>
+        </div>
     )
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
-    <BrowserRouter>
-        <Friends/>
-    </BrowserRouter>
+    <Provider store={store}>
+        <Income/>
+    </Provider>
 );
 
 // 📜 Описание:
-// При загрузке приложения на экране отображается
-// профиль пользователя и список друзей.
-// Если кликнуть на пользователя, то видим ❌404 Page Not Found❌
-// Исправьте код, чтобы по клику на пользователя
-// отображалась странице с информацией о друге.
-// В качестве ответа укажите исправленную строку кода.
+// напишите необходимы код для 49 строки
+// чтобы вывелась сумма дохода в строке баланса
 //
-// 🖥 Пример ответа: <Profile userId={4}/>
+// 🖥 Пример ответа: return work + donate
