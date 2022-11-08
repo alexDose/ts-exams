@@ -46,29 +46,8 @@ export const Income = () => {
 
     const dispatch = useAppDispatch()
 
-    return (
-        <div>
-            <div>
-                work: <input value={work}
-                             type={'number'}
-                             onChange={e => dispatch(changeValue({work: +e.target.value}))}/>
-            </div>
-            <div>
-                donate: <input value={donate}
-                               type={'number'}
-                               onChange={e => dispatch(changeValue({donate: +e.target.value}))}/>
-            </div>
+    return <div>balance: {work + donate}</div>
 
-            <div>balance: {balance}</div>
-            <button
-                onClick={() => {
-                    dispatch(changeValue({balance: work + donate}))
-                }}
-            >
-                calculate balance
-            </button>
-        </div>
-    )
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
