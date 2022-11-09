@@ -42,9 +42,6 @@ type ActionsType = ReturnType<typeof changeValue>
 export const Income = () => {
     const work = useAppSelector(state => state.app.work)
     const donate = useAppSelector(state => state.app.donate)
-    const balance = useAppSelector(state => state.app.balance)
-
-    const dispatch = useAppDispatch()
 
     return <div>balance: {work + donate}</div>
 
